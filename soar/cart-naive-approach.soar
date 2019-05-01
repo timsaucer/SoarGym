@@ -1,0 +1,116 @@
+rl --set learning on
+indifferent-selection --epsilon-greedy
+
+# Initialize the agent
+
+sp {propose*initialize-left-right
+    (state <s> ^superstate nil
+               -^name)
+-->
+    (<s> ^operator <o> +)
+    (<o> ^name initialize-left-right)
+    }
+
+sp {apply*initialize-left-right
+    (state <s> ^operator <o>)
+    (<o> ^name initialize-left-right)
+-->
+    (<s> ^name left-right
+         ^direction <d1> <d2>
+         ^cart <cart>)
+    (<d1> ^name left)
+    (<d2> ^name right)
+    }
+
+# Discretize the input link structure. This will end up forming the state space we will learn over.
+
+sp {elaborate*cart-data-structure
+    (state <s> ^superstate nil
+               ^io.input-link.gym <gym>
+               ^cart <cart>)
+    (<gym> ^cart-position <cart-pos>
+           ^cart-velocity <cart-vel>
+           ^pole-angle <pole-pos>
+           ^pole-tip-velocity <pole-vel>
+           ^current-reward <current-reward>)
+-->
+    (<cart> ^cart-pos (round-off <cart-pos> 0.5)
+            ^cart-vel (round-off <cart-vel> 0.5)
+            ^pole-pos (round-off <pole-pos> 1.0)
+            ^pole-vel (round-off <pole-vel> 0.5))
+    (<s> ^current-reward <current-reward>)
+    }
+
+# In order to learn moving left or right, we create two operators both as acceptable but NOT indifferent.
+
+gp {left-right*propose*move
+    (state <s> ^name left-right
+               -^output-cmd)
+-->
+    (<s> ^operator <o> +)
+    (<o> ^name move
+         ^dir [left right])
+    }
+
+gp {left-right*rl
+    (state <s> ^name left-right
+               ^cart <cart>
+               ^operator <o> +)
+    (<o> ^name move
+         ^dir [left right])
+    (<cart> ^cart-pos [-2.0 -1.5 -1.0 -0.5 0.0 0.5 1.0 1.5 2.0]
+            ^cart-vel [-2.0 -1.5 -1.0 -0.5 0.0 0.5 1.0 1.5 2.0]
+            ^pole-pos [-2.0 -1.0 0.0 1.0 2.0]
+            ^pole-vel [-2.0 -1.5 -1.0 -0.5 0.0 0.5 1.0 1.5 2.0])
+-->
+    (<s> ^operator <o> = 0)
+    }
+
+# Apply the movement
+
+sp {apply*move*create-output-command
+    (state <s> ^operator <o>)
+    (<o> ^name move
+         ^dir <dir>)
+-->
+    (<s> ^output-cmd <output-cmd>)
+    (<output-cmd> ^direction <dir>)
+    }
+
+# Remove the old commands after they are complete
+sp {propose*remove*old-output-command
+    (state <s> ^name left-right
+               ^output-cmd <cmd>)
+    (<cmd> ^status complete)
+-->
+    (<s> ^operator <o> +)
+    (<o> ^name remove-output-cmd)
+    (<o> ^cmd <cmd>)
+    }
+
+sp {apply*remove*old-output-command
+    (state <s> ^operator <o>)
+    (<o> ^name remove-output-cmd
+         ^cmd <cmd>)
+-->
+    (<s> ^output-cmd <cmd> -)
+    }
+
+# Update the reward
+
+sp {elaborate*reward
+    (state <s> ^name left-right
+               ^reward-link <r>
+               ^current-reward <current-reward>)
+-->
+    (<r> ^reward.value <current-reward>)
+    }
+
+sp {elaborate*onto-output-link
+    (state <s> ^name left-right
+               ^io.output-link <ol>
+               ^output-cmd <cmd>)
+-->
+    (<ol> ^move-cart <cmd>)
+    }
+
