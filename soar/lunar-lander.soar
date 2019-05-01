@@ -1,0 +1,368 @@
+source new-goal-system-4/load.soar
+
+# Initialize the agent
+
+NGS_DeclareType LunarLander {
+    position ""
+    velocity ""
+}
+
+NGS_DeclareType Pose {
+    x ""
+    y ""
+    theta ""
+}
+
+sp "lunar-lander*create-base-structure
+    [ngs-match-top-state <s>]
+-->
+    [ngs-create-typed-object <s> lunar-lander LunarLander <lunar-lander>]
+    [ngs-create-typed-object <lunar-lander> position Pose <new-position>]
+    [ngs-create-typed-object <lunar-lander> velocity Pose <new-velocity>]"
+
+sp {propose*initialize-left-right
+    (state <s> ^superstate nil
+               -^name)
+-->
+    (<s> ^operator <o> +)
+    (<o> ^name initialize-left-right)
+    }
+
+sp {apply*initialize-left-right
+    (state <s> ^operator <o>)
+    (<o> ^name initialize-left-right)
+-->
+    (<s> ^name left-right
+         ^cart-pole <cart-pole>)
+    (<cart-pole> ^cart <cart>)
+    (<cart-pole> ^pole <pole>)
+    }
+
+#
+# Discretize the input link structure. This will end up forming the state space we will learn over.
+#
+
+# Cart position
+sp {elaborate*cart-pos*side-left
+    (state <s> ^name left-right
+               ^io.input-link.gym <gym>
+               ^cart-pole.cart <cart>)
+    (<gym> ^cart-position <cart-pos> < 0.)
+-->
+    (<cart> ^side left)
+    }
+sp {elaborate*cart-pos*side-right
+    (state <s> ^name left-right
+               ^io.input-link.gym <gym>
+               ^cart-pole.cart <cart>)
+    (<gym> ^cart-position <cart-pos> >= 0.)
+-->
+    (<cart> ^side right)
+    }
+sp {elaborate*cart-pos*distance
+    (state <s> ^name left-right
+               ^io.input-link.gym <gym>
+               ^cart-pole.cart <cart>)
+    (<gym> ^cart-position <cart-pos>)
+-->
+    (<cart> ^dist (abs <cart-pos>))
+    }
+
+# Pole Position
+sp {elaborate*pole-pos*side-left
+    (state <s> ^name left-right
+               ^io.input-link.gym <gym>
+               ^cart-pole.pole <pole>)
+    (<gym> ^pole-angle <pole-pos> < 0.)
+-->
+    (<pole> ^side left)
+    }
+
+sp {elaborate*pole-pos*side-right
+    (state <s> ^name left-right
+               ^io.input-link.gym <gym>
+               ^cart-pole.pole <pole>)
+    (<gym> ^pole-angle <pole-pos> >= 0.)
+-->
+    (<pole> ^side right)
+    }
+sp {elaborate*pole-pos*distance
+    (state <s> ^name left-right
+               ^io.input-link.gym <gym>
+               ^cart-pole.pole <pole>)
+    (<gym> ^pole-angle <pole-pos>)
+-->
+    (<pole> ^dist (abs <pole-pos>))
+    }
+
+# Cart velocity
+sp {elaborate*cart-vel*moving-left
+    (state <s> ^name left-right
+               ^io.input-link.gym <gym>
+               ^cart-pole.cart <cart>)
+    (<gym> ^cart-velocity <cart-vel> < 0.)
+-->
+    (<cart> ^moving left)
+    }
+sp {elaborate*cart-vel*moving-right
+    (state <s> ^name left-right
+               ^io.input-link.gym <gym>
+               ^cart-pole.cart <cart>)
+    (<gym> ^cart-velocity <cart-vel> >= 0.)
+-->
+    (<cart> ^moving right)
+    }
+sp {elaborate*cart-vel*speed
+    (state <s> ^name left-right
+               ^io.input-link.gym <gym>
+               ^cart-pole.cart <cart>)
+    (<gym> ^cart-velocity <cart-vel>)
+-->
+    (<cart> ^speed (abs <cart-vel>))
+    }
+
+# Pole velocity
+sp {elaborate*pole-vel*moving-left
+    (state <s> ^name left-right
+               ^io.input-link.gym <gym>
+               ^cart-pole.pole <pole>)
+    (<gym> ^pole-tip-velocity <pole-vel> < 0.)
+-->
+    (<pole> ^moving left)
+    }
+sp {elaborate*pole-vel*moving-right
+    (state <s> ^name left-right
+               ^io.input-link.gym <gym>
+               ^cart-pole.pole <pole>)
+    (<gym> ^pole-tip-velocity <pole-vel> >= 0.)
+-->
+    (<pole> ^moving right)
+    }
+sp {elaborate*pole-vel*speed
+    (state <s> ^name left-right
+               ^io.input-link.gym <gym>
+               ^cart-pole.pole <pole>)
+    (<gym> ^pole-tip-velocity <pole-vel>)
+-->
+    (<pole> ^speed (abs <pole-vel>))
+    }
+
+# Cart distance and speed quantized
+sp {elaborate*cart-pos*too-far
+    (state <s> ^name left-right
+               ^cart-pole.cart <cart>)
+    (<cart> ^dist > 0.7)
+-->
+    (<cart> ^quantized-dist too-far)
+    }
+
+sp {elaborate*cart-pos*far
+    (state <s> ^name left-right
+               ^cart-pole.cart <cart>)
+    (<cart> ^dist <= 0.7)
+    (<cart> ^dist > 0.5)
+-->
+    (<cart> ^quantized-dist far)
+    }
+
+sp {elaborate*cart-pos*okay
+    (state <s> ^name left-right
+               ^cart-pole.cart <cart>)
+    (<cart> ^dist <= 0.5)
+    (<cart> ^dist > 0.2)
+-->
+    (<cart> ^quantized-dist okay)
+    }
+
+sp {elaborate*cart-pos*near-center
+    (state <s> ^name left-right
+               ^cart-pole.cart <cart>)
+    (<cart> ^dist <= 0.2)
+-->
+    (<cart> ^quantized-dist near-center)
+    }
+
+sp {elaborate*cart-vel*too-fast
+    (state <s> ^name left-right
+               ^cart-pole.cart <cart>)
+    (<cart> ^speed > 0.5)
+-->
+    (<cart> ^quantized-speed too-fast)
+    }
+
+sp {elaborate*cart-vel*fast
+    (state <s> ^name left-right
+               ^cart-pole.cart <cart>)
+    (<cart> ^speed <= 0.5)
+    (<cart> ^speed > 0.25)
+-->
+    (<cart> ^quantized-speed fast)
+    }
+
+sp {elaborate*cart-vel*okay
+    (state <s> ^name left-right
+               ^cart-pole.cart <cart>)
+    (<cart> ^speed <= 0.25)
+    (<cart> ^speed > 0.1)
+-->
+    (<cart> ^quantized-speed okay)
+    }
+
+sp {elaborate*cart-vel*slow
+    (state <s> ^name left-right
+               ^cart-pole.cart <cart>)
+    (<cart> ^speed <= 0.1)
+-->
+    (<cart> ^quantized-speed slow)
+    }
+
+# Pole angle and speed quantized
+sp {elaborate*pole-pos*too-far
+    (state <s> ^name left-right
+               ^cart-pole.pole <pole>)
+    (<pole> ^dist > 0.17)
+-->
+    (<pole> ^quantized-dist too-far)
+    }
+
+sp {elaborate*pole-pos*far
+    (state <s> ^name left-right
+               ^cart-pole.pole <pole>)
+    (<pole> ^dist <= 0.17)
+    (<pole> ^dist > 0.12)
+-->
+    (<pole> ^quantized-dist far)
+    }
+
+sp {elaborate*pole-pos*okay
+    (state <s> ^name left-right
+               ^cart-pole.pole <pole>)
+    (<pole> ^dist <= 0.12)
+    (<pole> ^dist > 0.04)
+-->
+    (<pole> ^quantized-dist okay)
+    }
+
+sp {elaborate*pole-pos*near-center
+    (state <s> ^name left-right
+               ^cart-pole.pole <pole>)
+    (<pole> ^dist <= 0.04)
+-->
+    (<pole> ^quantized-dist near-center)
+    }
+
+sp {elaborate*pole-vel*too-fast
+    (state <s> ^name left-right
+               ^cart-pole.pole <pole>)
+    (<pole> ^speed > 0.5)
+-->
+    (<pole> ^quantized-speed too-fast)
+    }
+
+sp {elaborate*pole-vel*fast
+    (state <s> ^name left-right
+               ^cart-pole.pole <pole>)
+    (<pole> ^speed <= 0.5)
+    (<pole> ^speed > 0.2)
+-->
+    (<pole> ^quantized-speed fast)
+    }
+
+sp {elaborate*pole-vel*okay
+    (state <s> ^name left-right
+               ^cart-pole.pole <pole>)
+    (<pole> ^speed <= 0.2)
+    (<pole> ^speed > 0.05)
+-->
+    (<pole> ^quantized-speed okay)
+    }
+
+sp {elaborate*pole-vel*slow
+    (state <s> ^name left-right
+               ^cart-pole.pole <pole>)
+    (<pole> ^speed <= 0.05)
+-->
+    (<pole> ^quantized-speed slow)
+    }
+
+# In order to learn moving left or right, we create two operators both as acceptable but NOT indifferent.
+
+gp {left-right*propose*move
+    (state <s> ^name left-right
+               -^output-cmd)
+-->
+    (<s> ^operator <o> +)
+    (<o> ^name move
+         ^dir [left right])
+    }
+
+gp {left-right*rl
+    (state <s> ^name left-right
+               ^cart-pole <cart-pole>
+               ^operator <o> +)
+    (<o> ^name move
+         ^dir [left right])
+    (<cart-pole> [^cart ^pole] <cart-or-pole>)
+    (<cart-or-pole> ^side [left right]
+                    ^moving [left right]
+                    ^quantized-speed [too-fast fast okay slow]
+                    ^quantized-dist [too-far far okay near-center])
+-->
+    (<s> ^operator <o> = 0)
+    }
+
+# Apply the movement
+
+sp {apply*move*create-output-command
+    (state <s> ^operator <o>)
+    (<o> ^name move
+         ^dir <dir>)
+-->
+    (<s> ^output-cmd <output-cmd>)
+    (<output-cmd> ^direction <dir>)
+    }
+
+# Remove the old commands after they are complete
+sp {propose*remove*old-output-command
+    (state <s> ^name left-right
+               ^output-cmd <cmd>)
+    (<cmd> ^status complete)
+-->
+    (<s> ^operator <o> +)
+    (<o> ^name remove-output-cmd)
+    (<o> ^cmd <cmd>)
+    }
+
+sp {apply*remove*old-output-command
+    (state <s> ^operator <o>)
+    (<o> ^name remove-output-cmd
+         ^cmd <cmd>)
+-->
+    (<s> ^output-cmd <cmd> -)
+    }
+
+# Update the reward
+
+# The reward is computed from the new position of the cart and pole
+# 25% of the reward is the distance from center: 0 distance = +1 reward, 2.4 distance = -1 reward
+# 75% of the reward is the angle of the pole: 0 angle = +1 reward, 12 degrees = -1 reward
+
+
+sp {elaborate*reward
+    (state <s> ^name left-right
+               ^reward-link <r>
+               ^cart-pole <cart-pole>)
+    (<cart-pole> ^cart.dist <cart-dist>
+                 ^pole.dist <pole-dist>)
+-->
+    (<r> ^reward.value (+ (* 0.9 (+ 1 (/ <pole-dist> -0.105))) (* 0.1 (+ 1 (/ <cart-dist> -1.2)))))
+    }
+
+sp {elaborate*onto-output-link
+    (state <s> ^name left-right
+               ^io.output-link <ol>
+               ^output-cmd <cmd>)
+-->
+    (<ol> ^move-cart <cmd>)
+    }
+
