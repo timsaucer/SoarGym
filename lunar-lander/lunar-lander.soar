@@ -13,12 +13,58 @@ NGS_DeclareType Pose {
     theta ""
 }
 
+NGS_DeclareType Position {
+    type { Pose }
+}
+
+NGS_DeclareType Velocity {
+    type { Pose }
+}
+
 sp "lunar-lander*create-base-structure
     [ngs-match-top-state <s>]
 -->
     [ngs-create-typed-object <s> lunar-lander LunarLander <lunar-lander>]
-    [ngs-create-typed-object <lunar-lander> position Pose <new-position>]
-    [ngs-create-typed-object <lunar-lander> velocity Pose <new-velocity>]"
+    [ngs-create-typed-object <lunar-lander> position Position <new-position>]
+    [ngs-create-typed-object <lunar-lander> velocity Velocity <new-velocity>]"
+
+sp "lunar-lander*direction-multiplier
+    [ngs-match-top-state <s> lunar-lander <il>]
+    [ngs-bind <il> gym.x-position]
+-->
+    [ngs-tag <lunar-lander> direction-multiplier {(/ <x-position> (abs <x-position>))}]"
+
+sp "lunar-lander*copy-gym-data
+    [ngs-match-top-state <s> lunar-lander <il>]
+    [ngs-bind <lunar-lander> position velocity @direction-multiplier]
+    [ngs-bind <il> gym]
+    [ngs-bind <gym> x-position y-position \
+                   x-velocity y-velocity \
+                   orientation-angle orientation-angular-velocity \
+                   left-pad-contact right-pad-contact]
+-->
+    [ngs-create-attribute <position> x {(* <direction-multiplier> <x-position>)}]
+    [ngs-create-attribute <position> y <y-position>]
+    [ngs-create-attribute <position> theta {(* <direction-multiplier> <orientation-angle>)}]
+    [ngs-create-attribute <velocity> x {(* <direction-multiplier> <x-velocity>)}]
+    [ngs-create-attribute <velocity> y <y-velocity>]
+    [ngs-create-attribute <velocity> theta {(* <direction-multiplier> <orientation-angular-velocity>)}]
+    [ngs-tag <lunar-lander> left-pad-contact <left-pad-contact>]
+    [ngs-tag <lunar-lander> right-pad-contact <right-pad-contact>]
+    "
+
+NGS_CreateGlobalContextVariablePool lunar-var-pool { lander-values }
+NGS_DefineDynamicBinValue lunar-var-pool lander-values orientation
+
+sp "lunar-lander*lander-orientation*bins
+    [ngs-match-to-create-context-variable <s> lunar-var-pool lander-values:<pool>]
+    [ngs-bind <s> lunar-lander.position]
+-->
+    [ngs-create-dyn-bin-value <pool> orientation <position> theta <bins> 0.005]
+    [ngs-add-dyn-bin <bins> straight-up  0.03 {}]
+    [ngs-add-dyn-bin <bins> slightly-off 0.08 straight-up]
+    [ngs-add-dyn-bin <bins> far-off      0.13 slightly-off]
+    [ngs-add-dyn-bin <bins> no-hope      {}   far-off]"
 
 sp {propose*initialize-left-right
     (state <s> ^superstate nil

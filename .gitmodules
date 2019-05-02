@@ -1,3 +1,3 @@
 [submodule "soar/new-goal-system-4"]
-	path = soar/new-goal-system-4
+	path = lunar-lander/new-goal-system-4
 	url = https://github.com/soartech/new-goal-system-4.git
