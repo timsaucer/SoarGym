@@ -106,6 +106,27 @@ def get_move_command(agent):
 def callback_print_message(mid, user_data, agent, message):
     print(message.strip())
 
+def create_input_wmes(agent):
+    gym_id = agent.GetInputLink().CreateIdWME('gym')
+    cart_pos = gym_id.CreateFloatWME('cart-position', 0.)
+    cart_vel = gym_id.CreateFloatWME('cart-velocity', 0.)
+    pole_pos = gym_id.CreateFloatWME('pole-angle', 0.)
+    pole_vel = gym_id.CreateFloatWME('pole-tip-velocity', 0.)
+
+    return (cart_pos, cart_vel, pole_pos, pole_vel)
+
+def has_contact(pad_value):
+    return pad_value > 0.5
+
+def update_input_wmes(observation):
+    global input_wmes
+    (cart_pos, cart_vel, pole_pos, pole_vel) = input_wmes
+    
+    cart_pos.Update(observation[0])
+    cart_vel.Update(observation[1])
+    pole_pos.Update(observation[2])
+    pole_vel.Update(observation[3])
+
 if __name__ == "__main__":
     # Create the user input thread and queue for return commands
     queue_user_cmds = queue.Queue()
@@ -120,16 +141,13 @@ if __name__ == "__main__":
     # Create the gym environment
     gym_env = gym.make('CartPole-v0')
     observation = gym_env.reset()
-    gym_id = agent.GetInputLink().CreateIdWME('gym')
-    cart_pos = gym_id.CreateFloatWME('cart-position', observation[0])
-    cart_vel = gym_id.CreateFloatWME('cart-velocity', observation[1])
-    pole_pos = gym_id.CreateFloatWME('pole-angle', observation[2])
-    pole_vel = gym_id.CreateFloatWME('pole-tip-velocity', observation[3])
-    reward_il = gym_id.CreateFloatWME('current-reward', 0.)
+    
+    input_wmes = create_input_wmes(agent)
+    update_input_wmes(observation)
     
     step_num = 0
     
-    print(agent.ExecuteCommandLine("source soar/cart-pole.soar"))
+    print(agent.ExecuteCommandLine("source cart-pole.soar"))
     
     while True:
         gym_env.render()
@@ -158,12 +176,7 @@ if __name__ == "__main__":
             observation, reward, done, info = gym_env.step(move_cmd)
             
             step_num = step_num + 1
-            
-            cart_pos.Update(observation[0])
-            cart_vel.Update(observation[1])
-            pole_pos.Update(observation[2])
-            pole_vel.Update(observation[3])
-            reward_il.Update(reward)
+            update_input_wmes(observation)
             
 #            print(step_num, observation)
             
