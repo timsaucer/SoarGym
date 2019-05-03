@@ -1,0 +1,6 @@
+##!
+# @file
+#
+# @created timothysaucer 20190503
+
+CORE_CreateMacroVar LL_DECISION_TACTIC lunar-lander-decision-tactic

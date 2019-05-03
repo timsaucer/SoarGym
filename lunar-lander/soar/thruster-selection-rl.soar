@@ -1,0 +1,38 @@
+##!
+# @file
+#
+# @created timothysaucer 20190502
+
+
+
+#NGS_DefineRLExpansion lunar-lander-rl-main-thruster "
+#    op-descriptions {
+#        select-main-thruster-engage { $NGS_OP_ID $NGS_RL_OP_PURPOSE_CREATE \
+#                                    { <lunar-lander> fire-mains <any-main-thruster-command> } }
+#    }
+#    bindings {
+#        { $NGS_OP_ID goal:<g> }
+#        { <g> task }
+#        { <s> lunar-lander }
+#        { <lunar-lander> position velocity}
+#    }
+#    variations {
+#        fire-mains { <g> @fire-main-thruster $NGS_RL_EXPAND_DISCRETE { $NGS_YES $NGS_NO } }
+#        x-distance { <position> x $NGS_RL_EXPAND_STATIC_BINS { 0.03 0.08 0.13 } }
+#        y-distance { <position> y $NGS_RL_EXPAND_STATIC_BINS { -0.08 0.0 0.03 0.08 0.13 } }
+#        angle      { <position> theta $NGS_RL_EXPAND_STATIC_BINS { -0.13 -0.08 -0.03 0.03 0.08 0.13 } }
+#        x-velocity { <velocity> x $NGS_RL_EXPAND_STATIC_BINS { -0.13 -0.08 -0.03 0.03 0.08 0.13 } }
+#        y-velocity { <velocity> y $NGS_RL_EXPAND_STATIC_BINS { -0.13 -0.08 -0.03 0.03 0.08 0.13 } }
+#        turn-rate  { <velocity> theta $NGS_RL_EXPAND_STATIC_BINS { -0.13 -0.08 -0.03 0.03 0.08 0.13 } }
+#        left-contact  { <lunar-lander> @left-pad-contact  $NGS_RL_EXPAND_DISCRETE { $NGS_YES $NGS_NO } }
+#        right-contact { <lunar-lander> @right-pad-contact $NGS_RL_EXPAND_DISCRETE { $NGS_YES $NGS_NO } }
+#    }
+#    expansions {
+#        main-thruster-engage { select-main-thruster-engage 0.0 { fire-mains \
+#                                                                x-distance y-distance angle \
+#                                                                x-velocity y-velocity turn-rate \
+#                                                                left-contact right-contact } }
+#    }
+#"
+
+#        main-thruster-engage { select-main-thruster-engage 0.0 { fire-mains left-contact right-contact } }

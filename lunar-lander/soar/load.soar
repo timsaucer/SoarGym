@@ -2,3 +2,17 @@
 # @file: 
 #
 # @created timothysaucer 20190502
+
+source new-goal-system-4/load.soar
+
+CORE_Source lunar-lander-variables.soar
+CORE_Source type-definitions.soar
+CORE_Source goal-definitions.soar
+
+CORE_Source base-data-structures.soar
+# CORE_Source context-variables.soar
+
+CORE_Source goal-structure.soar
+CORE_Source thruster-selection-rl.soar
+
+CORE_LoadDir tactics

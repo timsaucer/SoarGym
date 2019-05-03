@@ -1,0 +1,14 @@
+##!
+# @file
+#
+# @created timothysaucer 20190503
+
+
+sp "lunar-lander*free-fall*create-goal
+    [ngs-match-goal-to-create-subgoal <s> $LL_DECISION_TACTIC <supergoal> AchieveFreeFall <pool>]
+    [ngs-bind <s> lunar-lander]
+    [ngs-bind <lunar-lander> position velocity]
+    -->
+    [ngs-create-goal-in-place <pool> AchieveFreeFall $NGS_GB_ACHIEVE <g> <supergoal> "lunar-lander <lunar-lander>"]
+    [ngs-assign-decision <g> $LL_DECISION_TACTIC $NGS_YES]"
+

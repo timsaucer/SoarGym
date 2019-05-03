@@ -1,0 +1,8 @@
+##!
+# @file: 
+#
+# @created timothysaucer 20190503
+
+CORE_Source brake-hard.soar
+CORE_Source decision-logic.soar
+CORE_Source free-fall.soar

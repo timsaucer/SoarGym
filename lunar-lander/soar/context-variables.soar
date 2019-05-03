@@ -1,0 +1,47 @@
+##!
+# @file
+#
+# @created timothysaucer 20190502
+
+# For this case, everything is just in the global context
+
+NGS_CreateGlobalContextVariablePool lunar-var-pool { lander-values }
+NGS_DefineDynamicBinValue lunar-var-pool lander-values lateral-position
+NGS_DefineDynamicBinValue lunar-var-pool lander-values height
+NGS_DefineDynamicBinValue lunar-var-pool lander-values orientation
+
+NGS_DefineDynamicBinValue lunar-var-pool lander-values lateral-speed
+NGS_DefineDynamicBinValue lunar-var-pool lander-values fall-rate
+NGS_DefineDynamicBinValue lunar-var-pool lander-values turn-rate
+
+ngs-declare-tsp lunar-lander*lander-position*bins "
+    [ngs-match-to-create-context-variable <s> lunar-var-pool lander-values:<pool>]
+    [ngs-bind <s> lunar-lander.position]
+-->
+    [ngs-create-dyn-bin-value <pool> %var <position> %source <bins> %delta]
+    [ngs-add-dyn-bin <bins> optimal            %optimal-val           {}]
+    [ngs-add-dyn-bin <bins> slightly-off  %slightly-off-val      optimal]
+    [ngs-add-dyn-bin <bins> far-off            %far-off-val slightly-off]
+    [ngs-add-dyn-bin <bins> no-hope                      {}      far-off]"
+
+ngs-expand-tsp lunar-lander*lander-position*bins {
+    { %var lateral-position %source x-mag     %delta 0.005 %optimal-val 0.03 %slightly-off-val 0.08 %far-off-val 0.13 }
+    { %var height           %source y-mag     %delta 0.005 %optimal-val 0.03 %slightly-off-val 0.08 %far-off-val 0.13 }
+    { %var orientation      %source theta-mag %delta 0.005 %optimal-val 0.03 %slightly-off-val 0.08 %far-off-val 0.13 }
+}
+
+ngs-declare-tsp lunar-lander*lander-velocity*bins "
+    [ngs-match-to-create-context-variable <s> lunar-var-pool lander-values:<pool>]
+    [ngs-bind <s> lunar-lander.velocity]
+-->
+    [ngs-create-dyn-bin-value <pool> %var <velocity> %source <bins> %delta]
+    [ngs-add-dyn-bin <bins> slow          %slow-val       {}]
+    [ngs-add-dyn-bin <bins> moderate  %moderate-val     slow]
+    [ngs-add-dyn-bin <bins> fast          %fast-val moderate]
+    [ngs-add-dyn-bin <bins> very-fast            {}     fast]"
+
+ngs-expand-tsp lunar-lander*lander-velocity*bins {
+    { %var lateral-speed %source x-mag     %delta 0.005 %slow-val 0.03 %moderate-val 0.08 %fast-val 0.13 }
+    { %var fall-rate     %source y-mag     %delta 0.005 %slow-val 0.03 %moderate-val 0.08 %fast-val 0.13 }
+    { %var turn-rate     %source theta-mag %delta 0.005 %slow-val 0.03 %moderate-val 0.08 %fast-val 0.13 }
+}

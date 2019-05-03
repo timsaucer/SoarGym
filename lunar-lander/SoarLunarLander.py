@@ -39,7 +39,8 @@ class CliThread(threading.Thread):
             self.queue_main.put(cmd)
 
 def create_kernel():
-    kernel = sml.Kernel.CreateKernelInCurrentThread()
+    kernel = sml.Kernel.CreateKernelInCurrentThread(True, 12121)
+    print('Listening on port {}'.format(kernel.GetListenerPort()))
     if not kernel or kernel.HadError():
         print("Error creating kernel: " + kernel.GetLastErrorDescription())
         exit(1)
@@ -159,7 +160,7 @@ if __name__ == "__main__":
     print('Step, x-pos, y-pos, x-vel, y-vel, ang, ang-vel, left-pad, right-pad')
     print('{}, {}, {}, {}, {}, {}, {}, {}, {}'.format(step_num, observation[0], observation[1], observation[2], observation[3], observation[4], observation[5], has_contact(observation[6]), has_contact(observation[0])))
     
-    print(agent.ExecuteCommandLine("source soar/lunar-lander.soar"))
+    print(agent.ExecuteCommandLine("source soar/load.soar"))
      
     while True:
         gym_env.render()
@@ -181,6 +182,7 @@ if __name__ == "__main__":
         if is_paused:
             continue
          
+        kernel.CheckForIncomingCommands()
         kernel.RunAllAgents(1)
         move_cmd = get_move_command(agent)
          

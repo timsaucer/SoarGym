@@ -1,0 +1,21 @@
+##!
+# @file
+#
+# @created timothysaucer 20190503
+
+# This is a valid choice when firing the main thruster will not push us significantly away from the goal
+# Case where it's a bad idea
+#     Angle is to the right (we've already accounted for the +x being the side the vehicle is on)
+#     Angle is more than 15 degrees (0.26 radians)
+#     X velocity is positive (already moving away from the target)
+
+sp "lunar-lander*brake-hard*create-goal
+    [ngs-match-goal-to-create-subgoal <s> $LL_DECISION_TACTIC <supergoal> AchieveBrakeHard <pool>]
+    [ngs-bind <s> lunar-lander]
+    [ngs-bind <lunar-lander> position velocity]
+    [ngs-not [ngs-stable-gt <position> theta 0.26] \
+             [ngs-stable-gt <velocity> x 0.0]]
+    -->
+    [ngs-create-goal-in-place <pool> AchieveBrakeHard $NGS_GB_ACHIEVE <g> <supergoal> "lunar-lander <lunar-lander>"]
+    [ngs-assign-decision <g> $LL_DECISION_TACTIC $NGS_YES]"
+

@@ -1,18 +1,28 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <soaragent>
-  <startfile path="lunar-lander.soar" />
+  <startfile path="soar/load.soar" />
   <members>
-    <member path="new-goal-system-4" />
-    <member path="new-goal-system-4/ngs-4_0_0" />
-    <member path="new-goal-system-4/ngs-4_0_0/_core" />
-    <member path="new-goal-system-4/ngs-4_0_0/batch-operators" />
-    <member path="new-goal-system-4/ngs-4_0_0/behavior-explanation" />
-    <member path="new-goal-system-4/ngs-4_0_0/context-variables" />
-    <member path="new-goal-system-4/ngs-4_0_0/macros" />
-    <member path="new-goal-system-4/ngs-4_0_0/reinforcement-learning" />
-    <member path="new-goal-system-4/ngs-4_0_0/tests" />
-    <member path="new-goal-system-4/ngs-4_0_0/tests/behavior-explanation" />
-    <member path="lunar-lander.soar" />
+    <member path="soar/new-goal-system-4" />
+    <member path="soar/new-goal-system-4/ngs-4_0_0" />
+    <member path="soar/new-goal-system-4/ngs-4_0_0/_core" />
+    <member path="soar/new-goal-system-4/ngs-4_0_0/batch-operators" />
+    <member path="soar/new-goal-system-4/ngs-4_0_0/behavior-explanation" />
+    <member path="soar/new-goal-system-4/ngs-4_0_0/context-variables" />
+    <member path="soar/new-goal-system-4/ngs-4_0_0/macros" />
+    <member path="soar/new-goal-system-4/ngs-4_0_0/reinforcement-learning" />
+    <member path="soar/new-goal-system-4/ngs-4_0_0/tests" />
+    <member path="soar/new-goal-system-4/ngs-4_0_0/tests/behavior-explanation" />
+    <member path="soar/base-data-structures.soar" />
+    <member path="soar/context-variables.soar" />
+    <member path="soar/load.soar" />
+    <member path="soar/thruster-selection-rl.soar" />
+    <member path="soar/type-definitions.soar" />
+    <member path="soar/goal-structure.soar" />
+    <member path="soar/lunar-lander-variables.soar" />
+    <member path="soar/tactics/brake-hard.soar" />
+    <member path="soar/tactics/load.soar" />
+    <member path="soar/goal-definitions.soar" />
+    <member path="soar/tactics/decision-logic.soar" />
   </members>
 </soaragent>
 

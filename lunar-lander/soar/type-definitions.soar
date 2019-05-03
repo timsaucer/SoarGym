@@ -1,0 +1,24 @@
+##!
+# @file
+#
+# @created timothysaucer 20190502
+
+
+NGS_DeclareType LunarLander {
+    position ""
+    velocity ""
+}
+
+NGS_DeclareType Pose {
+    x ""
+    y ""
+    theta ""
+}
+
+NGS_DeclareType Position {
+    type { Pose }
+}
+
+NGS_DeclareType Velocity {
+    type { Pose }
+}
