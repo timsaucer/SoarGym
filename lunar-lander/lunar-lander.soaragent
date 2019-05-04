@@ -23,6 +23,10 @@
     <member path="soar/tactics/load.soar" />
     <member path="soar/goal-definitions.soar" />
     <member path="soar/tactics/decision-logic.soar" />
+    <member path="soar/reward.soar" />
+    <member path="soar/tactics/free-fall.soar" />
+    <member path="soar/tactics/rotate.soar" />
+    <member path="soar/output-command.soar" />
   </members>
 </soaragent>
 

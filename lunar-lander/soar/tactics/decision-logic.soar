@@ -3,48 +3,47 @@
 #
 # @created timothysaucer 20190503
 
+# Bind to the output link command so we get a new decision every cycle
 sp "lunar-lander*request-decision*firing-tactic
     [ngs-match-goal <s> AchieveSafeLanding <g>]
+    [ngs-output-link <s> <ol>]
+    [ngs-nex <ol> command]
 -->
     [ngs-irequest-decision <g> $LL_DECISION_TACTIC <g> tactic]"
 
-# It's important that we do not pass the indifferent option to making the choice by operator
-sp "lunar-lander*make-choice*create-appropriate-tactic
+sp "lunar-lander*tactic*ready
+    [ngs-match-goal <s> AchieveManeuverOutput <g>]
+    [ngs-bind <g> thrusters]
+-->
+    [ngs-assign-decision <g> $LL_DECISION_TACTIC]"
+
+# In order to use RL we do not pass the indifferent option to making the choice by operator
+sp "lunar-lander*make-choice*tactic
     [ngs-match-to-make-choice <ss> $LL_DECISION_TACTIC <supergoal> AchieveSafeLanding]
     [ngs-is-decision-choice <ss> <g>]
 -->
-    [ngs-create-attribute-by-operator <ss> <supergoal> appropriate-tactic <g> "" ""]"
-
-sp "lunar-lander*make-choice*appropriate-tactic-exists
-    [ngs-match-to-make-choice <ss> $LL_DECISION_TACTIC <supergoal> AchieveSafeLanding]
-    [ngs-bind <supergoal> appropriate-tactic:<g>]
--->
-    [ngs-make-choice-by-operator <ss> <g> "> ="]"
+    [ngs-make-choice-by-operator <ss> <g> ""]"
 
 NGS_DefineRLExpansion lunar-lander-rl-main-thruster "
     op-descriptions {
-        select-tactic-brake-hard { $NGS_OP_ID $NGS_RL_OP_PURPOSE_CREATE { <ss> appropriate-tactic <g> } { [ngs-is-type <g> AchieveBrakeHard] } }
-        select-tactic-free-fall  { $NGS_OP_ID $NGS_RL_OP_PURPOSE_CREATE { <ss> appropriate-tactic <g> } { [ngs-is-type <g> AchieveFreeFall]  } }
+        select-tactic-brake-hard { $NGS_OP_ID $NGS_RL_OP_PURPOSE_CHOICE { <g> } { [ngs-is-type <g> AchieveBrakeHard] } }
+        select-tactic-free-fall  { $NGS_OP_ID $NGS_RL_OP_PURPOSE_CHOICE { <g> } { [ngs-is-type <g> AchieveFreeFall]  } }
+        select-rotate            { $NGS_OP_ID $NGS_RL_OP_PURPOSE_CHOICE { <g> } { [ngs-is-type <g> AchieveRotate]  } }
     }
     bindings {
         { <g> task }
         { <g> lunar-lander }
         { <lunar-lander> position }
-        { <lunar-lander> velocity}
+        { <lunar-lander> velocity }
     }
     variations {
-        turn-rate  { <velocity> theta $NGS_RL_EXPAND_STATIC_BINS { -0.13 -0.08 -0.03 0.03 0.08 0.13 } }
-        left-contact  { <lunar-lander> @left-pad-contact  $NGS_RL_EXPAND_DISCRETE { $NGS_YES $NGS_NO } }
+        altitude                { <position> y $NGS_RL_EXPAND_STATIC_BINS { -0.2 0.0 0.4 0.8 1.2 } }
+        horizontal-displacement { <position> x $NGS_RL_EXPAND_STATIC_BINS { 0.2 0.5 0.75 1.0 } }
+        turn-rate               { <velocity> theta $NGS_RL_EXPAND_STATIC_BINS { -0.13 -0.08 -0.03 0.03 0.08 0.13 } }
     }
     expansions {
-        brake-hard { select-tactic-brake-hard 0.0 { turn-rate left-contact } }
-        free-fall  { select-tactic-free-fall  0.0 { turn-rate left-contact } }
+        brake-hard { select-tactic-brake-hard 0.0 { altitude } }
+        free-fall  { select-tactic-free-fall  0.0 { altitude } }
+        rotate     { select-rotate            0.0 { horizontal-displacement turn-rate } }
     }
 "
-
-#sp {stoprunning
-#    (state <s> ^operator <o> +)
-#    (<o> ^dest-attribute appropriate-tactic)
-#    -->
-#    (interrupt)
-#}

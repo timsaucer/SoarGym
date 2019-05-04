@@ -1,0 +1,70 @@
+##!
+# @file
+#
+# @created timothysaucer 20190503
+
+sp "lunar-lander*reward*time-to-impact
+    [ngs-match-top-state <s> lunar-lander]
+    [ngs-bind <lunar-lander> position.y:<y-pos> velocity.y:<y-vel>]
+-->
+    [ngs-create-attribute <lunar-lander> time-to-impact {(* -1.0 (/ <y-pos> <y-vel>))}]"
+
+sp "lunar-lander*reward*x-intercept
+    [ngs-match-top-state <s> lunar-lander]
+    [ngs-bind <lunar-lander> position.x:<x-pos> velocity.x:<x-vel> time-to-impact]
+-->
+    [ngs-create-attribute <lunar-lander> x-intercept {(abs (+ <x-pos> (* <time-to-impact> <x-vel>)))}]"
+
+# X-intercept of 0 is reward +1
+# X-intercept of 3 is reward -1
+sp "lunar-lander*reward*on-landing-pad
+    [ngs-match-top-state <s> lunar-lander]
+    [ngs-bind <s> reward-link]
+    [ngs-bind <lunar-lander> x-intercept]
+    [ngs-lt <lunar-lander> x-intercept 3.0]
+-->
+    [ngs-create-attribute <reward-link> landing-pad-reward {(+ 1.0 (* -0.5 <x-intercept>))}]"
+
+sp "lunar-lander*reward*far-off-landing-pad
+    [ngs-match-top-state <s> lunar-lander]
+    [ngs-bind <s> reward-link]
+    [ngs-stable-gte <lunar-lander> x-intercept 3.0]
+-->
+    [ngs-create-attribute <reward-link> landing-pad-reward -1.0]"
+
+# Y velocity of 0 is +1
+# Y velocity of 2 is -1
+sp "lunar-lander*impact-speed-reward
+    [ngs-match-top-state <s> lunar-lander.velocity.y-mag]
+    [ngs-bind <s> reward-link]
+    [ngs-lt <velocity> y-mag 2.0]
+-->
+    [ngs-create-attribute <reward-link> impact-speed-reward {(+ 1.0 (* -1.0 <y-mag>))}]"
+
+sp "lunar-lander*impact-speed-reward*way-too-fast
+    [ngs-match-top-state <s> lunar-lander.velocity]
+    [ngs-bind <s> reward-link]
+    [ngs-stable-lt <velocity> y -2.0]
+-->
+    [ngs-create-attribute <reward-link> impact-speed-reward -1.0]"
+
+# Total reward. At y=1.5 you care 90% location 10% speed
+#               At y=0.0 you care 10% location 90% speed
+
+sp "lunar-lander*rewards*percentages
+    [ngs-match-top-state <s> reward-link]
+    [ngs-bind <reward-link> landing-pad-reward impact-speed-reward]
+    [ngs-bind <s> lunar-lander.position.y-mag]
+-->
+    [ngs-create-attribute <reward-link> pct-landing-pad {(+ 0.1 (* 0.533 <landing-pad-reward>))}]
+    [ngs-create-attribute <reward-link> pct-impact-speed {(+ 0.9 (* -0.533 <impact-speed-reward>))}]"
+
+# Actual reward is 50% our projection and 50% from input link
+
+sp "lunar-lander*rewards*total-reward
+    [ngs-match-top-state <s> reward-link <il>]
+    [ngs-bind <il> gym.reward:<reward-val>]
+    [ngs-bind <reward-link> pct-landing-pad pct-impact-speed]
+-->
+    [ngs-create-attribute <reward-link> reward <reward>]
+    [ngs-create-attribute <reward> value {(+ (* 0.25 (+ <pct-landing-pad> <pct-impact-speed>)) (* 0.75 <reward-val>))}]"

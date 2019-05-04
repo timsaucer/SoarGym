@@ -22,3 +22,10 @@ NGS_DeclareType Position {
 NGS_DeclareType Velocity {
     type { Pose }
 }
+
+NGS_DeclareType OutputCommand {
+} 
+
+NGS_DeclareType ManeuverCommand {
+    type { OutputCommand }
+}

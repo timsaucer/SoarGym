@@ -8,6 +8,7 @@ NGS_DeclareGoal AchieveSafeLanding {
 
 
 NGS_DeclareGoal AchieveManeuverOutput {
+    thrusters ""
 }
 
 NGS_DeclareGoal AchieveBrakeHard {
@@ -15,5 +16,9 @@ NGS_DeclareGoal AchieveBrakeHard {
 }
 
 NGS_DeclareGoal AchieveFreeFall {
+    type AchieveManeuverOutput
+}
+
+NGS_DeclareGoal AchieveRotate {
     type AchieveManeuverOutput
 }

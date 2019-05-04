@@ -1,0 +1,43 @@
+##!
+# @file
+#
+# @created timothysaucer 20190503
+
+#     [ngs-bind <velocity> theta:>:0.0]
+
+# IT LOOKS LIKE THE THETA VALUES ARE BACKWARDS OF WHAT WE'D EXPECT
+
+sp "lunar-lander*rotate*towards-goal
+    [ngs-match-goal-to-create-subgoal <s> $LL_DECISION_TACTIC <supergoal> AchieveRotate <pool>]
+    [ngs-bind <s> lunar-lander]
+    [ngs-bind <lunar-lander> position.theta:<:0.0 velocity.x:>:0.0]
+    -->
+    [ngs-create-goal-in-place <pool> AchieveRotate $NGS_GB_ACHIEVE <g> <supergoal> "lunar-lander <lunar-lander> turn-direction $LL_SIDE_THRUSTERS_LEFT"]"
+
+#     [ngs-bind <velocity> theta:<:0.0]
+
+sp "lunar-lander*rotate*away-from-goal*moving-too-fast
+    [ngs-match-goal-to-create-subgoal <s> $LL_DECISION_TACTIC <supergoal> AchieveRotate <pool>]
+    [ngs-bind <s> lunar-lander]
+    [ngs-bind <lunar-lander> position.theta:>:0.0 velocity.x:<:-0.5]
+-->
+    [ngs-create-goal-in-place <pool> AchieveRotate $NGS_GB_ACHIEVE <g> <supergoal> "lunar-lander <lunar-lander> turn-direction $LL_SIDE_THRUSTERS_RIGHT"]"
+
+sp "lunar-lander*rotate*create-manuever*same-side
+    [ngs-match-goal <s> AchieveRotate <g>]
+    [ngs-bind <s> lunar-lander.@direction-multiplier:>:0.0]
+    [ngs-bind <g> turn-direction]
+-->
+    [ngs-create-attribute <g> thrusters <turn-direction>]"
+
+ngs-declare-tsp lunar-lander*rotate*create-manuever*opposite-side "
+    [ngs-match-goal <s> AchieveRotate <g>]
+    [ngs-bind <s> lunar-lander.@direction-multiplier:<:0.0]
+    [ngs-bind <g> turn-direction:%direction]
+-->
+    [ngs-create-attribute <g> thrusters %opposite]"
+
+ngs-expand-tsp lunar-lander*rotate*create-manuever*opposite-side "
+    { %direction $LL_SIDE_THRUSTERS_LEFT  %opposite $LL_SIDE_THRUSTERS_RIGHT }
+    { %direction $LL_SIDE_THRUSTERS_RIGHT %opposite $LL_SIDE_THRUSTERS_LEFT  }
+"

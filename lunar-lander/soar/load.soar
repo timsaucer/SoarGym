@@ -16,3 +16,6 @@ CORE_Source goal-structure.soar
 CORE_Source thruster-selection-rl.soar
 
 CORE_LoadDir tactics
+
+CORE_Source output-command.soar
+CORE_Source reward.soar

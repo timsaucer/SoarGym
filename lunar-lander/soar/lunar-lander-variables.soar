@@ -4,3 +4,8 @@
 # @created timothysaucer 20190503
 
 CORE_CreateMacroVar LL_DECISION_TACTIC lunar-lander-decision-tactic
+
+CORE_CreateMacroVar LL_THRUSTERS_OFF         thrusters-off
+CORE_CreateMacroVar LL_MAIN_THRUSTERS_ON     main-thrusters-on
+CORE_CreateMacroVar LL_SIDE_THRUSTERS_LEFT   side-thrusters-left
+CORE_CreateMacroVar LL_SIDE_THRUSTERS_RIGHT  side-thrusters-right
