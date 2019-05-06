@@ -7,16 +7,16 @@
 # Case where it's a bad idea
 #  Case 1:
 #     Angle is to the right (we've already accounted for the +x being the side the vehicle is on)
-#     Angle is more than 15 degrees (0.26 radians)
+#     Angle is less than -15 degrees (0.26 radians)
 #     X velocity is positive (already moving away from the target)
 #  Case 2:
 #     Already at the top of the screen
 
 sp "lunar-lander*brake-hard*create-goal
-    [ngs-match-goal-to-create-subgoal <s> $LL_DECISION_TACTIC <supergoal> AchieveBrakeHard <pool>]
+    [ngs-match-goal-to-create-subgoal <s> AchieveSafeLanding <supergoal> AchieveBrakeHard <pool>]
     [ngs-bind <s> lunar-lander]
     [ngs-bind <lunar-lander> position velocity]
-    [ngs-not [ngs-stable-gt <position> theta 0.26] \
+    [ngs-not [ngs-stable-lt <position> theta -0.26] \
              [ngs-stable-gt <velocity> x 0.0]]
     [ngs-stable-lt <position> y 1.4]
 -->

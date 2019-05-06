@@ -5,7 +5,7 @@
 
 
 sp "lunar-lander*free-fall*create-goal
-    [ngs-match-goal-to-create-subgoal <s> $LL_DECISION_TACTIC <supergoal> AchieveFreeFall <pool>]
+    [ngs-match-goal-to-create-subgoal <s> AchieveSafeLanding <supergoal> AchieveFreeFall <pool>]
     [ngs-bind <s> lunar-lander]
     [ngs-bind <lunar-lander> position.y:>:0.25 velocity]
     -->

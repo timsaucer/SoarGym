@@ -115,9 +115,6 @@ def create_input_wmes(agent):
 
     return (cart_pos, cart_vel, pole_pos, pole_vel)
 
-def has_contact(pad_value):
-    return pad_value > 0.5
-
 def update_input_wmes(observation):
     global input_wmes
     (cart_pos, cart_vel, pole_pos, pole_vel) = input_wmes
@@ -178,7 +175,7 @@ if __name__ == "__main__":
             step_num = step_num + 1
             update_input_wmes(observation)
             
-#            print(step_num, observation)
+#            print('Step: {}   Observation: {}'.format(step_num, observation))
             
             if done:
                 if step_num >= 195:
@@ -192,7 +189,6 @@ if __name__ == "__main__":
                     num_consecutive_passes = 0
                     
                 print('Episode, {}, Number of steps, {}, Number of consecutive passes, {}'.format(episode_num, step_num, num_consecutive_passes))
-#                print('Episode: ', episode_num, "Number of steps: ", step_num, 'Number of consecutive passes: ', num_consecutive_passes)
                 episode_num = episode_num + 1
                 
                 step_num = 0

@@ -4,8 +4,8 @@
 # @created timothysaucer 20190504
 
 sp "lunar-lander*output-command
-    [ngs-match-selected-goal <s> AchieveManeuverOutput <g>]
+    [ngs-match-goal <s> AchieveSafeLanding <g>]
     [ngs-output-link <s> <ol>]
-    [ngs-bind <g> thrusters]
+    [ngs-bind <g> appropriate-tactic.thrusters]
 -->
     [ngs-create-output-command-by-operator <s> <ol> ManeuverCommand <cmd> "thrusters <thrusters>"]"

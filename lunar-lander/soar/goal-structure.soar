@@ -15,45 +15,6 @@ sp "lunar-lander*create-goal*land-safely
 -->
     [ngs-create-goal-by-operator <s> AchieveSafeLanding $NGS_GB_ACHIEVE <new-goal>]"
 
-
-sp "lunar-lander*create-goal*fire-main-thrusters*yes
-    [ngs-match-goal-to-create-subgoal <s> AchieveSafeLanding <supergoal> AchieveFireMainThrusters <pool>]
-    
--->
-    [ngs-create-goal-in-place <pool> AchieveFireMainThrusters $NGS_GB_ACHIEVE <g>]
-    [ngs-tag <g> fire-main-thruster $NGS_YES]"
-
-sp "lunar-lander*create-goal*fire-main-thrusters*no
-    [ngs-match-goal-to-create-subgoal <s> AchieveSafeLanding <supergoal> AchieveFireMainThrusters <pool>]
-    
--->
-    [ngs-create-goal-in-place <pool> AchieveFireMainThrusters $NGS_GB_ACHIEVE <g>]
-    [ngs-tag <g> fire-main-thruster $NGS_NO]"
-
-sp "lunar-lander*copy*fire-main-thrusters*to-lunar-lander
-    [ngs-match-goal <s> AchieveFireMainThrusters <g>]
-    [ngs-bind <g> @fire-main-thruster]
-    [ngs-bind <s> lunar-lander]
--->
-    [ngs-create-attribute-by-operator <s> <lunar-lander> fire-mains <fire-main-thrusters> "" ""]
-    [ngs-create-attribute $NGS_OP_ID goal <g>]"
-
-sp "lunar-lander*thruster-goals*ctx-vars
-    [ngs-match-goal <s> AchieveFireThrusters <g>]
-    [ngs-bind-global-ctx <s> lunar-var-pool lander-values "fall-rate::<fall-rate> \
-                                                           height::<height> \
-                                                           lateral-position::<lateral-position> \
-                                                           lateral-speed::<lateral-speed> \
-                                                           orientation::<orientation> \
-                                                           turn-rate::<turn-rate>"]
--->
-    [ngs-create-attribute <g> fall-rate <fall-rate>]
-    [ngs-create-attribute <g> height <height>]
-    [ngs-create-attribute <g> lateral-position <lateral-position>]
-    [ngs-create-attribute <g> lateral-speed <lateral-speed>]
-    [ngs-create-attribute <g> orientation <orientation>]
-    [ngs-create-attribute <g> turn-rate <turn-rate>]"
-
 #sp "lunar-lander*create-goal*fire-side-thrusters
 #    [ngs-match-goal-to-create-subgoal <s> AchieveSafeLanding <supergoal> AchieveFireSideThrusters <pool>]
 #    

@@ -329,9 +329,8 @@ sp {apply*remove*old-output-command
 # Update the reward
 
 # The reward is computed from the new position of the cart and pole
-# 25% of the reward is the distance from center: 0 distance = +1 reward, 2.4 distance = -1 reward
-# 75% of the reward is the angle of the pole: 0 angle = +1 reward, 12 degrees = -1 reward
-
+# 10% of the reward is the distance from center: 0 distance = +1 reward, 2.4 distance = -1 reward
+# 90% of the reward is the angle of the pole: 0 angle = +1 reward, 12 degrees = -1 reward
 
 sp {elaborate*reward
     (state <s> ^name left-right

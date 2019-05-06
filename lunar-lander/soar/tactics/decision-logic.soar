@@ -3,36 +3,51 @@
 #
 # @created timothysaucer 20190503
 
-# Bind to the output link command so we get a new decision every cycle
-sp "lunar-lander*request-decision*firing-tactic
+sp "lunar-lander*tactic-ready
+    [ngs-match-goal <s> AchieveManeuverOutput <g>]
+    [ngs-is-supergoal <g> <supergoal>]
+    [ngs-bind <g> thrusters]
+    [ngs-nex <supergoal> appropriate-tactic]
+-->
+    [ngs-create-attribute-by-operator <s> <supergoal> appropriate-tactic <g> "" ""]"
+
+sp "lunar-lander*remove-old
     [ngs-match-goal <s> AchieveSafeLanding <g>]
+    [ngs-bind <g> appropriate-tactic]
     [ngs-output-link <s> <ol>]
     [ngs-nex <ol> command]
 -->
-    [ngs-irequest-decision <g> $LL_DECISION_TACTIC <g> tactic]"
+    [ngs-remove-attribute-by-operator <s> <g> appropriate-tactic <appropriate-tactic>]"
 
-sp "lunar-lander*tactic*ready
-    [ngs-match-goal <s> AchieveManeuverOutput <g>]
-    [ngs-bind <g> thrusters]
--->
-    [ngs-assign-decision <g> $LL_DECISION_TACTIC]"
-
-# In order to use RL we do not pass the indifferent option to making the choice by operator
-sp "lunar-lander*make-choice*tactic
-    [ngs-match-to-make-choice <ss> $LL_DECISION_TACTIC <supergoal> AchieveSafeLanding]
-    [ngs-is-decision-choice <ss> <g>]
--->
-    [ngs-make-choice-by-operator <ss> <g> ""]"
+# Bind to the output link command so we get a new decision every cycle
+#sp "lunar-lander*request-decision*firing-tactic
+#    [ngs-match-goal <s> AchieveSafeLanding <g>]
+#    [ngs-output-link <s> <ol>]
+#    [ngs-nex <ol> command]
+#-->
+#    [ngs-irequest-decision <g> $LL_DECISION_TACTIC <g> tactic]"
+#
+#sp "lunar-lander*tactic*ready
+#    [ngs-match-goal <s> AchieveManeuverOutput <g>]
+#    [ngs-bind <g> thrusters]
+#-->
+#    [ngs-assign-decision <g> $LL_DECISION_TACTIC]"
+#
+## In order to use RL we do not pass the indifferent option to making the choice by operator
+#sp "lunar-lander*make-choice*tactic
+#    [ngs-match-to-make-choice <ss> $LL_DECISION_TACTIC <supergoal> AchieveSafeLanding]
+#    [ngs-is-decision-choice <ss> <g>]
+#-->
+#    [ngs-make-choice-by-operator <ss> <g> ""]"
 
 NGS_DefineRLExpansion lunar-lander-rl-main-thruster "
     op-descriptions {
-        select-tactic-brake-hard { $NGS_OP_ID $NGS_RL_OP_PURPOSE_CHOICE { <g> } { [ngs-is-type <g> AchieveBrakeHard] } }
-        select-tactic-free-fall  { $NGS_OP_ID $NGS_RL_OP_PURPOSE_CHOICE { <g> } { [ngs-is-type <g> AchieveFreeFall]  } }
-        select-rotate            { $NGS_OP_ID $NGS_RL_OP_PURPOSE_CHOICE { <g> } { [ngs-is-type <g> AchieveRotate]  } }
+        select-tactic-brake-hard { $NGS_OP_ID $NGS_RL_OP_PURPOSE_CREATE { <g-safe-landing> appropriate-tactic <g-maneuver> } { [ngs-is-type <g-maneuver> AchieveBrakeHard] } }
+        select-tactic-free-fall  { $NGS_OP_ID $NGS_RL_OP_PURPOSE_CREATE { <g-safe-landing> appropriate-tactic <g-maneuver> } { [ngs-is-type <g-maneuver> AchieveFreeFall]  } }
+        select-rotate            { $NGS_OP_ID $NGS_RL_OP_PURPOSE_CREATE { <g-safe-landing> appropriate-tactic <g-maneuver> } { [ngs-is-type <g-maneuver> AchieveRotate]    } }
     }
     bindings {
-        { <g> task }
-        { <g> lunar-lander }
+        { <g-maneuver> lunar-lander }
         { <lunar-lander> position }
         { <lunar-lander> velocity }
     }
